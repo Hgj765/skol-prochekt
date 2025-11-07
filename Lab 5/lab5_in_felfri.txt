@@ -1,0 +1,12 @@
+Christian, 12
+Emma, 39
+
+Linda, 3, 7
+50
+49, Vahid
+Jocke, 70
+Tove, 19
+Daniel, JÄTTEMYCKET
+Allan,
+Frida, 50
+, 29

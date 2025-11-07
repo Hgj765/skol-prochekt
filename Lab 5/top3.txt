@@ -1,0 +1,3 @@
+Frida, 50
+Emma, 39
+Tove, 19
