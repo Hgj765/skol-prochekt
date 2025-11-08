@@ -25,22 +25,13 @@ class Cell:
 
 class Grid:
     def __init__(self, width, height, cells):
-        print(cells)
+
         self.width = width
         self.height = height
 
         self.cells = cells
-        for hight in cells:
-            for width in hight:
-                pass
 
-        self.grid = self.make_grid()#inte perfekt sätt att göra det men nu görs de så
-        self.print_grid()
 
-        self.grannlista = self.grannar(self.cells)
-        self.dö()
-        self.födas()
-        print(self.cells)
 
 
     def make_grid(self):
@@ -81,12 +72,19 @@ class Grid:
         for cell in self.grannlista:
             for hight in range(-1,2):
                 for width in range(-1, 2):
-                    if not (hight == 0 and width == 0)     and  not str(Cell(cell.x+width, cell.y+hight)) in list(str(i) for i in self.grannlista.keys()):
-                        döds_alternativ = self.grannar(set(list(self.grannlista.keys())+ [Cell(cell.x+width, cell.y+hight)]))
-                        döds_alternativ_granar = döds_alternativ[next(iter(set(döds_alternativ).difference(set(list(self.grannlista.keys())))))]
 
-                        if döds_alternativ_granar >=3:
-                            self.cells.add(next(iter(set(döds_alternativ).difference(set(list(self.grannlista.keys()))))))
+                    if not (hight == 0 and width == 0):#if looparna skulle kunna vara i en med and mellan sig men de blev oläsligt och de här är lite bättre
+                        if not str(Cell(cell.x+width, cell.y+hight)) in list(str(i) for i in self.grannlista.keys()):
+
+
+                            if not str(Cell(cell.x+width, cell.y+hight)) in str(self.cells):
+
+                                döds_alternativ = self.grannar(set(list(self.grannlista.keys())+ [Cell(cell.x+width, cell.y+hight)]))
+                                döds_alternativ_granar = döds_alternativ[next(iter(set(döds_alternativ).difference(set(list(self.grannlista.keys())))))]
+
+                                if döds_alternativ_granar >=3:
+                                    self.cells.add(next(iter(set(döds_alternativ).difference(set(list(self.grannlista.keys()))))))
+        print("\n\n\n")
 
                 #döds alternativ tar dubleter och de måste fixas för annars ses sama ruta flera gånger
 
@@ -112,5 +110,20 @@ grid = Grid(10,
                 Cell(9,9)
             }
             )
+
+
+for i in range(10):
+    print(grid.cells)
+    grid.grid = grid.make_grid()  # inte perfekt sätt att göra det men nu görs de så
+    grid.print_grid()
+
+
+    grid.grannlista = grid.grannar(grid.cells)
+    grid.dö()
+    grid.födas()
+print(grid.cells)
+grid.grid = grid.make_grid()  # inte perfekt sätt att göra det men nu görs de så
+grid.print_grid()
+
 
 
