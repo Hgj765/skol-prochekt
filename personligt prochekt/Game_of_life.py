@@ -22,7 +22,7 @@ class Cell:
 
 
 class Grid:
-    def __init__(self, width, height, cells):
+    def __init__(self, width = 0, height=0, cells=[]):
 
         self.width = width
         self.height = height
@@ -92,7 +92,7 @@ class Grid:
                                         if födas_alternativ_granar ==3:
                                             self.cells.append(next(iter(set(födas_alternativ).difference(set(list(self.grann_lista.keys()))))))
 
-        print("\n\n\n")
+
 
                 #döds alternativ tar dubleter och de måste fixas för annars ses sama ruta flera gånger
 
@@ -109,9 +109,7 @@ class Grid:
         # om antalet grannar är mindre än mindre än 2 eller mer än 3 ska de dö
 
     def update(self):
-        print(self.cells)
-        self.grid = self.make_grid()  # inte perfekt sätt att göra det men nu görs de så
-        self.print_grid()
+
 
         self.grann_lista = self.grannar(self.cells)
         self.dö()
@@ -132,6 +130,9 @@ if __name__ == "__main__":
 
     for i in range(5):
         test_grid.update()
+        print(test_grid.cells)
+        test_grid.grid = test_grid.make_grid()  # inte perfekt sätt att göra det men nu görs de så
+        test_grid.print_grid()
 
 
 
