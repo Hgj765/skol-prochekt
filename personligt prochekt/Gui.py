@@ -5,18 +5,24 @@ from Game_of_life import *
 
 
 
-class App(tk.Tk):
+class App():
     #klassen är för tkinter fönstret som visar spel planen
-    def __init__(self):
+    def __init__(self,root=tk.Tk()):
+        #de skumaste guit jag någonsin gort
+        #basicly de är bara ett tkinter gui till Game_of_life
+        self.root = root
+
 
         super().__init__()
         self.grid_dict = {}
         self.width = grid.width
         self.height = grid.height
 
+        self.spela=False
+        self.task_id = None
 
-        self.screen_width = self.winfo_screenwidth()#fråga inte ordet var kortare
-        self.screen_height = self.winfo_screenheight()
+        self.screen_width = self.root.winfo_screenwidth()#fråga inte ordet var kortare
+        self.screen_height = self.root.winfo_screenheight()
 
 
         self.tw = tk.IntVar(value=self.width)
@@ -24,37 +30,38 @@ class App(tk.Tk):
 
 
 
-        self.frame1 = tk.LabelFrame(self)
+        self.frame1 = tk.LabelFrame(self.root)
         self.frame1.grid(row=0,column=0,sticky="NW")
 
-        self.frame2 = tk.LabelFrame(self)
+        self.frame2 = tk.LabelFrame(self.root)
         self.frame2.grid(row=1, column=0, sticky="Nw")
 
-        self.frame_grid = tk.LabelFrame(self)
+        self.frame_grid = tk.LabelFrame(self.root)
         self.frame_grid.grid(row=0, column=1, sticky="NW", rowspan=2)
 
 
 
-        self.btn = tk.Button(self.frame1, text="Next step", width=16,command=self.next_step)
-        self.btn.grid(row=1, sticky="nw")
-        self.btn = tk.Button(self.frame1, text="Save and exit", width=16,command=self.stop)
-        self.btn.grid(row=3, sticky="nw")
+        self.btn_n = tk.Button(self.frame1, text="Next step", width=16,command=self.next_step)
+        self.btn_n.grid(row=1, sticky="nw")
+        self.btn_c = tk.Button(self.frame1, text="Clear bord", width=16, command=self.clear)
+        self.btn_c.grid(row=2, sticky="nw")
+        self.btn_p = tk.Button(self.frame1, text="Play", width=16, command=self.toggle_play)
+        self.btn_p.grid(row=2, sticky="nw")
+        self.btn_s = tk.Button(self.frame1, text="Save and exit", width=16,command=self.stop)
+        self.btn_s.grid(row=3, sticky="nw")
 
 
 
-
-
-        self.name = tk.Label(self.frame2, text="Bred")
+        self.name = tk.Label(self.frame2, text="updatera grid stolek", bg="blue", fg="white")
         self.name.grid(row=0)
-
+        self.name = tk.Label(self.frame2, text="Bred")
+        self.name.grid(row=1)
         self.name_entry = tk.Entry(self.frame2, textvariable=self.tw)
-        self.name_entry.grid(row=1)
-
+        self.name_entry.grid(row=2)
         self.name = tk.Label(self.frame2, text="Höjd")
-        self.name.grid(row=2)
-
+        self.name.grid(row=3)
         self.name_entry = tk.Entry(self.frame2, textvariable=self.th)
-        self.name_entry.grid(row=3)
+        self.name_entry.grid(row=4)
         self.btn = tk.Button(self.frame2, text="Update grid", width=16, command=self.new_grid)
         self.btn.grid(row=5, sticky="nw")
 
@@ -66,10 +73,12 @@ class App(tk.Tk):
         self.new_grid()
 
     def stop(self):
-        fil((grid.cells))
-        App.destroy(self)
+        #sparar de valda cellerna och avslutar programmet
+        fil(grid.cells)
+        self.root.destroy()
 
     def select_cell(self, button):
+        #när en cell klickas blir den antingen vald eller avvald, den här funktionen holler koll på de
         current_color = button.cget("bg")
 
         vald_cell = Cell(int(button.grid_info()['column']),int(button.grid_info()['row']))
@@ -88,8 +97,9 @@ class App(tk.Tk):
         button.config(bg=new_color)
 
     def new_grid(self):
+        #funktionen skapar eller skalar om griden genom att först ta bort allt som redan är där och lägger in de igen
         for c in range(0, len(grid.cells)):  # c för cordinate men de blev oläsbart
-            print(str(grid.cells[c]))
+
             if grid.cells[c].x > self.width:
                 self.tw.set(grid.cells[c].x)
 
@@ -109,7 +119,7 @@ class App(tk.Tk):
         self.width = grid.width
         self.height = grid.height
 
-        self.frame_grid = tk.LabelFrame(self)
+        self.frame_grid = tk.LabelFrame(self.root)
         self.frame_grid.grid(row=0, column=1, sticky="NW", rowspan=2)
 
         for h in range(int(self.th.get())+1):
@@ -124,7 +134,7 @@ class App(tk.Tk):
                 self.grid_dict[f"[{w},{h}]"].config(command=lambda b=self.grid_dict[f"[{w},{h}]"]: self.select_cell(b))
                 self.grid_dict[f"[{w},{h}]"].grid(row=h, column=w, sticky="nw")
 
-        print(int(self.tw.get()),int(self.th.get()),"dojfnbsojdfnodkfbn")
+
         for cell in grid.cells:
             self.grid_dict[str(cell)].config(bg="green")
 
@@ -140,19 +150,45 @@ class App(tk.Tk):
 
             self.grid_dict[str(cell)].config(bg="green")
 
-    def play(self):
 
-        self.next_step()
-        time.sleep(1)
+
+
+
+    def toggle_play(self):
+
+        if self.spela:
+            # Stop the task
+            self.spela = False
+            self.btn_p.config(text="Start")
+            if self.task_id:
+                self.root.after_cancel(self.task_id)
+        else:
+            # Start the task
+            self.spela = True
+            self.btn_p.config(text="Pause")
+            self.play()
+
+
+    def play(self):
+        if self.spela:
+            self.next_step()
+            self.task_id = self.root.after(500, self.play)
+            print("Played")
+
+
     def clear(self):
+        #tar bort alla valda celler
         for cell in grid.cells:
             self.grid_dict[str(cell)].config(bg="SystemButtonFace")
         grid.cells = []
 
+
+
 grid = Grid()
 if __name__ == "__main__":
+
     app = App()
-    app.mainloop()
+    app.root.mainloop()
 
 
 

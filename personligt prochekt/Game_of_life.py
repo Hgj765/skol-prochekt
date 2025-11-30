@@ -1,12 +1,13 @@
-import json
+
+
 #daniel wickleus
 #personligt prochekt till dd1310
 
 #kriterier
-#basicly game of life
-#grid med celler
-#en cell överlever om den har 2 eller 3 grannar annars dör den
-#en tom cell som har 3 granar föder en ny cell
+    #basicly game of life
+    #grid med celler
+    #en cell överlever om den har 2 eller 3 grannar annars dör den
+    #en tom cell som har 3 granar föder en ny cell
 
 
 #VARNING: variabler som heter samma ord kan variera i stavning, jag är dyslektiker. samma variebel har korekt stavning men olika variabler kan variera
@@ -92,6 +93,7 @@ class Grid:
             granceller[cello] = 0
             for cellt in cells:#cellt = cell two
                 if str(cello) != str(cellt):
+                    #debuging prints
                     """print(cello, cellt,
                           cellt.y % (self.height ) ,
                           cello.y % (self.height),
@@ -118,35 +120,30 @@ class Grid:
         #räkna antalet grannar cellen har
 
     def födas(self):
+        #om tom ruta har mer än 3 grannar ska den födas, funktionen klollar alla relevanta rutor och ser om de ska födas
+        #jag hatar den här funktionen men den funkar
         for cell in self.grann_lista:
-
                 for width in range(-1,2):
                     for hight in range(-1, 2):
-                        if not (hight == 0 and width == 0):#if looparna skulle kunna vara i en med and mellan sig men de blev oläsligt och de här är lite bättre
-                            if not str(Cell(cell.x+width, cell.y+hight)) in list(str(i) for i in self.grann_lista.keys()):#ser till så cellen inte fins i grann_lista
-                                    if not str(Cell(cell.x+width, cell.y+hight)) in str(self.cells):
-                                        #den här koden suger men den funkar (►__◄)
-                                        födas_alternativ = self.grannar(
-                                            list(
-                                                self.grann_lista.keys())+
-                                                [Cell((cell.x+width)%(self.width+1),
-                                                (cell.y+hight)%(self.height+1))]
+                        curent_cell = Cell((cell.x+width)%(self.width+1),(cell.y+hight)%(self.height+1))#curent cell som i den som är relevant för tilfelet
 
-                                        )
-                                        print(list(födas_alternativ.keys()-self.grann_lista.keys())[0].x,list(födas_alternativ.keys()-self.grann_lista.keys())[0].y)
-                                        print()
+                        if not (hight == 0 and width == 0):                                                                         #if looparna skulle kunna vara i en med and mellan sig men de blev oläsligt och blev marginelt bättre
+                            if not (str(curent_cell) in list(str(i) for i in self.grann_lista.keys())):                                                         #ser till så cellen inte fins i grann_lista
+                                    if str(curent_cell) not in str(self.cells):
 
+                                        födas_alternativ = self.grannar( list(self.grann_lista.keys())+[curent_cell])
                                         födas_alternativ_granar = födas_alternativ[list(födas_alternativ.keys()-self.grann_lista.keys())[0]]
+
                                         if födas_alternativ_granar ==3:
                                             self.cells.append(list(födas_alternativ.keys()-self.grann_lista.keys())[0])
 
 
 
-                #döds alternativ tar dubleter och de måste fixas för annars ses sama ruta flera gånger
 
-        # om tom ruta har mer än 3 grannar ska den födas
+
 
     def dö(self):
+        #om antalet grannar är mindre än mindre än 2 eller mer än 3 ska de dö
         for cell in self.grann_lista:
             if not (2 == self.grann_lista[cell] or self.grann_lista[cell]== 3) or not 0<=cell.x<= self.width or not 0<=cell.y<= self.height:
                 self.cells.remove(cell)
@@ -154,16 +151,19 @@ class Grid:
 
 
 
-        # om antalet grannar är mindre än mindre än 2 eller mer än 3 ska de dö
+
 
     def update(self):
-        #print(self.cells)
+        #borde igentligen heta stega eller next_step
+        #funktionen går till nästa generation i spelet
+
         self.grid = self.make_grid()  # inte perfekt sätt att göra det men nu görs de så
-        #self.print_grid()
+
 
         self.grann_lista = self.grannar(self.cells)
         self.dö()
         self.födas()
+
 
 def fil( x):
     with open("glidare.txt", "w") as f:
