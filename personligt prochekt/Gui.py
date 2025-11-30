@@ -11,12 +11,11 @@ class App():
         #de skumaste guit jag någonsin gort
         #basicly de är bara ett tkinter gui till Game_of_life
         self.root = root
+        self.grid = Grid()
 
 
         super().__init__()
         self.grid_dict = {}
-        self.width = grid.width
-        self.height = grid.height
 
         self.spela=False
         self.task_id = None
@@ -25,8 +24,8 @@ class App():
         self.screen_height = self.root.winfo_screenheight()
 
 
-        self.tw = tk.IntVar(value=self.width)
-        self.th = tk.IntVar(value=self.height)
+        self.tw = tk.IntVar(value=self.grid.width)
+        self.th = tk.IntVar(value=self.grid.height)
 
 
 
@@ -74,7 +73,7 @@ class App():
 
     def stop(self):
         #sparar de valda cellerna och avslutar programmet
-        fil(grid.cells)
+        spara(self.grid.cells)
         self.root.destroy()
 
     def select_cell(self, button):
@@ -86,25 +85,25 @@ class App():
 
         if current_color == "SystemButtonFace":
             new_color = "green"
-            grid.cells.append(vald_cell)
+            self.grid.cells.append(vald_cell)
 
         else:
             new_color = "SystemButtonFace"
 
-            for cell in grid.cells:#den ville inte funka annars men de här suger
+            for cell in self.grid.cells:#den ville inte funka annars men de här suger
                 if cell.x == vald_cell.x and cell.y == vald_cell.y:
-                    grid.cells.remove(cell)
+                    self.grid.cells.remove(cell)
         button.config(bg=new_color)
 
     def new_grid(self):
         #funktionen skapar eller skalar om griden genom att först ta bort allt som redan är där och lägger in de igen
-        for c in range(0, len(grid.cells)):  # c för cordinate men de blev oläsbart
+        for c in range(0, len(self.grid.cells)):  # c för cordinate men de blev oläsbart
 
-            if grid.cells[c].x > self.width:
-                self.tw.set(grid.cells[c].x)
+            if self.grid.cells[c].x > self.grid.width:
+                self.tw.set(self.grid.cells[c].x)
 
-            if grid.cells[c].y > self.height:
-                self.th.set(grid.cells[c].y)
+            if self.grid.cells[c].y > self.grid.height:
+                self.th.set(self.grid.cells[c].y)
 
 
         self.grid_dict = {}
@@ -114,10 +113,9 @@ class App():
         for widget in self.frame_grid.winfo_children():
             widget.destroy()
 
-        grid.height  = int(self.th.get())
-        grid.width = int(self.tw.get())
-        self.width = grid.width
-        self.height = grid.height
+        self.grid.height  = int(self.th.get())
+        self.grid.width = int(self.tw.get())
+
 
         self.frame_grid = tk.LabelFrame(self.root)
         self.frame_grid.grid(row=0, column=1, sticky="NW", rowspan=2)
@@ -126,8 +124,8 @@ class App():
             for w in range(int(self.tw.get())+1):
                 self.grid_dict[f"[{w},{h}]"] = tk.Button(self.frame_grid,
                                                     text="",
-                                                    width=int((self.screen_width / 30) / self.width),
-                                                    height=int((self.screen_height / 30) / self.height),
+                                                    width=int((self.screen_width / 30) / self.grid.width),
+                                                    height=int((self.screen_height / 30) / self.grid.height),
 
                                                     )
 
@@ -135,18 +133,18 @@ class App():
                 self.grid_dict[f"[{w},{h}]"].grid(row=h, column=w, sticky="nw")
 
 
-        for cell in grid.cells:
+        for cell in self.grid.cells:
             self.grid_dict[str(cell)].config(bg="green")
 
 
     def next_step(self):
 
-        grid.update()
+        self.grid.update()
 
         for cell in self.grid_dict.keys():
             self.grid_dict[cell].config(bg="SystemButtonFace")
 
-        for cell in grid.cells:
+        for cell in self.grid.cells:
 
             self.grid_dict[str(cell)].config(bg="green")
 
@@ -178,13 +176,13 @@ class App():
 
     def clear(self):
         #tar bort alla valda celler
-        for cell in grid.cells:
+        for cell in self.grid.cells:
             self.grid_dict[str(cell)].config(bg="SystemButtonFace")
-        grid.cells = []
+        self.grid.cells = []
 
 
 
-grid = Grid()
+
 if __name__ == "__main__":
 
     app = App()

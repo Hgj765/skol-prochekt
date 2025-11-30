@@ -165,11 +165,11 @@ class Grid:
         self.födas()
 
 
-def fil( x):
-    with open("glidare.txt", "w") as f:
-        for rad in x:
-            skriv=str(int(rad.x))+" "+str(int(rad.y))+"\n"
-            f.write(skriv)
+    def spara(self,x):
+        with open("glidare.txt", "w") as f:
+            for rad in x:
+                skriv=str(int(rad.x))+" "+str(int(rad.y))+"\n"
+                f.write(skriv)
 
 
 if __name__ == "__main__":
