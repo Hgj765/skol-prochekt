@@ -1,6 +1,6 @@
 
 
-#daniel wickleus
+#Daniel wickleus
 #personligt prochekt till dd1310
 
 #kriterier
@@ -10,8 +10,10 @@
     #en tom cell som har 3 granar föder en ny cell
 
 
-#VARNING: variabler som heter samma ord kan variera i stavning, jag är dyslektiker. samma variebel har korekt stavning men olika variabler kan variera
+#VARNING: olika variabler som heter samma ord kan variera i stavning, jag är dyslektiker. samma variebel har korekt stavning men olika variabler kan variera även om de är samma ord
 class Cell:
+    #klassen är igentligen inte nödvendig men den är såpass integrerad i programet att ta bort den skulle ta massa tid och liksom orka
+    #klassen är legit bara kordinater med x och y atribut
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -24,7 +26,8 @@ class Cell:
 
 
 class Grid:
-    def __init__(self, width=10, height=10, cells=[]):
+    #klassen skapar och hanterar matrisen med celler
+    def __init__(self, width=10, height=10, cells = []):
 
         self.width = width
         self.height = height
@@ -35,25 +38,23 @@ class Grid:
         try:#läser in förvalda celler från fil
             with open("glidare.txt", "r") as f:
                 file_c=f.readlines()
-            for cell in range(0,len(file_c)):
-                file_c[cell]=file_c[cell].replace("\n","").split()
+            try:
+                for cell in range(0,len(file_c)):
+                    file_c[cell]=file_c[cell].replace("\n","").split()
+
+                for c in range(0, len(file_c)):  # c för cordinate men de blev oläsbart
+                    if int(file_c[c][0]) > self.width:
+                        self.width=(int(file_c[c][0]))
+                    if int(file_c[c][1]) > self.height:
+                        self.height=(int(file_c[c][1]))
 
 
 
-
-            for c in range(0, len(file_c)):  # c för cordinate men de blev oläsbart
-                if int(file_c[c ][0]) > self.width:
-                    self.width=(int(file_c[c ][0]))
-                if int(file_c[c][1]) > self.height:
-                    self.height=(int(file_c[c][1]))
-
-
-                self.cells.append(Cell(int(file_c[c][0]), int(file_c[c][1])))
-
-
-        except:
-            with open("glidare.txt", "w") as f:
+                    self.cells.append(Cell(int(file_c[c][0]), int(file_c[c][1])))
+            except:
                 pass
+        except:
+            pass
 
 
 
@@ -78,11 +79,11 @@ class Grid:
         return grid
 
     def print_grid(self):
-        #printar ut en fin grid så att de går att se den
-        for width in range(self.width):
-            print("  ",width, end=" ")
+        #printar ut en fin grid så att de går att se den i consolen
+        for width in range(self.width+1):
+            print("   ",width, end="")
         print()
-        for i in range(self.width):
+        for i in range(self.height+1):
             print(i, self.grid[i])
 
     def grannar(self,cells):
@@ -137,21 +138,11 @@ class Grid:
                                         if födas_alternativ_granar ==3:
                                             self.cells.append(list(födas_alternativ.keys()-self.grann_lista.keys())[0])
 
-
-
-
-
-
     def dö(self):
         #om antalet grannar är mindre än mindre än 2 eller mer än 3 ska de dö
         for cell in self.grann_lista:
             if not (2 == self.grann_lista[cell] or self.grann_lista[cell]== 3) or not 0<=cell.x<= self.width or not 0<=cell.y<= self.height:
                 self.cells.remove(cell)
-
-
-
-
-
 
     def update(self):
         #borde igentligen heta stega eller next_step
@@ -164,20 +155,61 @@ class Grid:
         self.dö()
         self.födas()
 
-
-    def spara(self,x):
+    def spara(self,x):#metoden behöver varken vara i en klass och andvends egentligen bara från Gui klassen men de kändes mer lämpligt att metoden som sparar griden var i samma klass som den skapas och hanteras i
+        #funktionen sparar de valda cellerna
         with open("glidare.txt", "w") as f:
             for rad in x:
                 skriv=str(int(rad.x))+" "+str(int(rad.y))+"\n"
                 f.write(skriv)
 
+    def ui(self):
+        #text interfacet genom basic input och if satser
+        self.grid=self.make_grid()
+        self.print_grid()
+        self.kör=True
+        while self.kör:
+            print("""Vill du
+\t(1)-Gå till nästa generation
+\t(2)-Rensa bort alla celler
+\t(3)-Gå fram ett satt antal generationer
+\t(4)-Spara de celler du har och avsluta programmet
+                    """)
+            try:
+                val=int(input())
+                if val==1:
+                    self.update()
+                    self.grid=self.make_grid()
+                    self.print_grid()
+
+                elif val==2:
+                    self.cells = []
+                    self.grid=self.make_grid()
+                    self.print_grid()
+                elif val==3:
+                    antal=int(input("hur många generationer framåt vill du gå"))
+                    try:
+                        for i in range(antal):
+                            self.update()
+                        self.grid=self.make_grid()
+                        self.print_grid()
+                    except:
+                        print("måste vara ett nummer")
+
+                elif val==4:
+                    self.spara(self.cells)
+                else:
+                    print("inte ett alternativ, måste vara inom 1-4")
+            except:
+                print("inte ett alternativ, måste vara en sifra")
+
+
+
 
 if __name__ == "__main__":
-    test_grid = Grid( )
+    test_grid = Grid()
+    test_grid.ui()
 
 
-    for i in range(5):
-        test_grid.update()
 
 
 
