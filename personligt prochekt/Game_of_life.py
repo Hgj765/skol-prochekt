@@ -56,9 +56,6 @@ class Grid:
                 print("Error: något är fell med inläsningen från filen")
         except:
             print("Error: hitade ingen fil")
-            
-
-
 
 
 
