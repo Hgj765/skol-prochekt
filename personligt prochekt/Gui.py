@@ -3,6 +3,7 @@ import tkinter as tk
 from Game_of_life import *
 
 
+
 #a tkinter gui for Game_of_life.py
 
 
@@ -14,7 +15,6 @@ class App():
 
         self.root = root
         self.grid = Grid()
-
 
         super().__init__()
         self.grid_dict = {}
@@ -29,14 +29,13 @@ class App():
         self.tw = tk.IntVar(value=self.grid.width)
         self.th = tk.IntVar(value=self.grid.height)
         self.multi_generations_step =tk.StringVar()
-
-
+        tk.Grid.columnconfigure(root, 1, weight=1)
+        tk.Grid.rowconfigure(root, 0, weight=1)
+        tk.Grid.rowconfigure(root, 1, weight=1)
         self.frame1 = tk.LabelFrame(self.root)
         self.frame1.grid(row=0,column=0,sticky="NW")
-
         self.frame2 = tk.LabelFrame(self.root)
         self.frame2.grid(row=1, column=0, sticky="Nw")
-
         self.frame_grid = tk.LabelFrame(self.root)
         self.frame_grid.grid(row=0, column=1, sticky="NW", rowspan=2)
 
@@ -77,15 +76,12 @@ class App():
         self.name_entry.grid(row=4)
         self.btn = tk.Button(self.frame2, text="Update grid", width=16, command=self.new_grid)
         self.btn.grid(row=5, sticky="nw")
-
-
     def stop(self):
         #quit the program by closing the window
         self.root.destroy()
     def save(self):
         #calls upon the grid method to save the cells to a file
         self.grid.spara(self.grid.cells)
-
     def select_cell(self, button):
         #a cell when clicked is either added to the list of cells or removed from it
         #Input: "button" the button that was clicked, dont ask how it works it is weard as shit
@@ -103,7 +99,6 @@ class App():
                 if cell.x == vald_cell.x and cell.y == vald_cell.y:
                     self.grid.cells.remove(cell)
         button.config(bg=new_color)
-
     def new_grid(self):
         #first it clears the grid and then it updates it with the new size and cells
         #also creates the original grid the same way
@@ -123,25 +118,25 @@ class App():
             widget.destroy()
 
         self.frame_grid = tk.LabelFrame(self.root)
-        self.frame_grid.grid(row=0, column=1, sticky="NW", rowspan=2)
+        self.frame_grid.grid(row=0, column=1, sticky="NSEW", rowspan=2)
+
 
         for h in range(int(self.th.get())+1):
+            self.frame_grid.rowconfigure(h, weight=1)
             for w in range(int(self.tw.get())+1):
+                self.frame_grid.columnconfigure(w, weight=1)
                 self.grid_dict[f"[{w},{h}]"] = tk.Button(self.frame_grid,
                                                     text="",
                                                     width=int((self.screen_width / 700) ),
-                                                    height=int((self.screen_height / 700) ),
-                                                    )
+                                                    height=int((self.screen_height / 700) ),)
                                                     #lambra function is maid with insperation from internet
+
                 self.grid_dict[f"[{w},{h}]"].config(command=lambda b=self.grid_dict[f"[{w},{h}]"]: self.select_cell(b))
-                #self.grid_dict[f"[{w},{h}]"].config(command=self.select_cell(self.grid_dict[f"[{w},{h}]"]))
-                self.grid_dict[f"[{w},{h}]"].grid(row=h, column=w, sticky="nw")
+                self.grid_dict[f"[{w},{h}]"].grid(row=h, column=w, sticky="NSEW")
 
 
         for cell in self.grid.cells:
             self.grid_dict[str(cell)].config(bg="green")
-
-
     def next_step(self):
         #just like save calls the grids save method this calls the update method then changes the coulprs to show the new grid
         #Input: nothing
@@ -154,8 +149,6 @@ class App():
         for cell in self.grid.cells:
 
             self.grid_dict[str(cell)].config(bg="green")
-
-
     def toggle_play(self):
         #toggles the play button between start and pause and while it is in play the play method is runing
         #Input: from button
@@ -168,8 +161,6 @@ class App():
             self.spela = True
             self.btn_p.config(text="Pause")
             self.play()
-
-
     def play(self):
         #calls upen next step and then runs itself again after 500ms
         #it is realy weard on this level of programing but it runs in paralell with the rest of the program
@@ -179,9 +170,6 @@ class App():
         if self.spela:
             self.next_step()
             self.task_id = self.root.after(500, self.play)
-
-
-
     def clear(self):
         #removes all cells from the grid and clears the list
         #input: nothing
