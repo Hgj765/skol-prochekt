@@ -1,10 +1,12 @@
+import sys
+from logging import exception
 
 
 #Daniel wickleus
 #personligt prochekt till dd1310
 
 #kriterier
-    #basicly game of life
+    #mer eller mindre game of life
     #grid med celler
     #en cell överlever om den har 2 eller 3 grannar annars dör den
     #en tom cell som har 3 granar föder en ny cell
@@ -21,14 +23,13 @@ class Cell:
         return f'[{self.x},{self.y}]'
     __repr__ = __str__
 
-
-
-
-
 class Grid:
     #klassen skapar och hanterar matrisen med celler
     def __init__(self, width=10, height=10, cells = []):
-
+        #innit skapar grundstrukturen för griden genom att
+            #defeniera grund stoleken av griden
+            #ladda in sparade celler
+            #om de fins celler som skulle vara utanför griden expanderas griden för att inesluta dem
         self.width = width
         self.height = height
 
@@ -52,66 +53,59 @@ class Grid:
 
                     self.cells.append(Cell(int(file_c[c][0]), int(file_c[c][1])))
             except:
-                pass
+                print("Error: något är fell med inläsningen från filen")
         except:
-            pass
+            print("Error: hitade ingen fil")
+            
 
 
 
 
-    def make_grid(self):
-        #skapar en string som ska visa hur griden ser ut, borde mergas med print_grid
+
+    def make_print_grid(self):
+        # skapar en string som ska visa hur griden ser ut, borde mergas med print_grid
         grid = []
-        for height in range(self.height+1):
+        for height in range(self.height + 1):
             grid.append([])
-            for width in range(self.width+1):
-
+            for width in range(self.width + 1):
                 grid[height].append("-")
 
         for cell in self.cells:
-            grid[cell.y][cell.x]="*"
-
-
-
-
-
-
-        return grid
-
-    def print_grid(self):
+            grid[cell.y][cell.x] = "*"
+        
         #printar ut en fin grid så att de går att se den i consolen
         for width in range(self.width+1):
             print("   ",width, end="")
         print()
         for i in range(self.height+1):
-            print(i, self.grid[i])
+            print(i, grid[i])
 
     def grannar(self,cells):
         #skapar en dict med celler och gämför sen om avståndet till andra celler är 1 aka är ett steg ifrån
         #metoden måste inte vara i klassen men orkar inte flyta den och de funkar lika bra oavsät
         granceller ={}
-        for cello in cells:#cello= cell one
-            granceller[cello] = 0
-            for cellt in cells:#cellt = cell two
-                if str(cello) != str(cellt):
+        for cell_1 in cells:#cell_1= cell one
+            granceller[cell_1] = 0
+            for cell_2 in cells:#cell_2 = cell two
+                if str(cell_1) != str(cell_2):
                     #debuging prints
-                    """print(cello, cellt,
-                          cellt.y % (self.height ) ,
-                          cello.y % (self.height),
-                          cellt.x % (self.width ) ,
-                          cello.x % (self.width ),
-                          abs(int(cellt.y % (self.height +1)) - int(cello.y % (self.height+1))) <= 1,
-                           abs(int(cellt.x % (self.width +1))- int(cello.x % (self.width +1))) <= 1,
+                    """print(cell_1, cell_2,
+                          cell_2.y % (self.height ) ,
+                          cell_1.y % (self.height),
+                          cell_2.x % (self.width ) ,
+                          cell_1.x % (self.width ),
+                          abs(int(cell_2.y % (self.height +1)) - int(cell_1.y % (self.height+1))) <= 1,
+                           abs(int(cell_2.x % (self.width +1))- int(cell_1.x % (self.width +1))) <= 1,
 
-                          (abs(int(cellt.y % (self.height +1)) - int(cello.y % (self.height+1)))%self.height <= 1 and
-                           (abs(int(cellt.x % (self.width +1))- int(cello.x % (self.width +1))))%self.width <= 1),
+                          (abs(int(cell_2.y % (self.height +1)) - int(cell_1.y % (self.height+1)))%self.height <= 1 and
+                           (abs(int(cell_2.x % (self.width +1))- int(cell_1.x % (self.width +1))))%self.width <= 1),
 
-                          granceller[cello])"""
+                          granceller[cell_1])"""
 
 
-                    if (abs(int(cellt.y % (self.height +1)) - int(cello.y % (self.height+1)))%self.height <= 1 and
-                           (abs(int(cellt.x % (self.width +1))- int(cello.x % (self.width +1))))%self.width <= 1):
-                        granceller[cello]+=1
+                    if (abs(int(cell_2.y % (self.height +1)) - int(cell_1.y % (self.height+1)))%self.height <= 1 and
+                           (abs(int(cell_2.x % (self.width +1))- int(cell_1.x % (self.width +1))))%self.width <= 1):
+                        granceller[cell_1]+=1
 
 
 
@@ -157,57 +151,58 @@ class Grid:
 
     def spara(self,x):#metoden behöver varken vara i en klass och andvends egentligen bara från Gui klassen men de kändes mer lämpligt att metoden som sparar griden var i samma klass som den skapas och hanteras i
         #funktionen sparar de valda cellerna
-        with open("glidare.txt", "w") as f:
+        with open("glidare_1.txt", "w") as f:
             for rad in x:
                 skriv=str(int(rad.x))+" "+str(int(rad.y))+"\n"
                 f.write(skriv)
 
-    def ui(self):
-        #text interfacet genom basic input och if satser
-        self.grid=self.make_grid()
-        self.print_grid()
-        self.kör=True
-        while self.kör:
-            print("""Vill du
-\t(1)-Gå till nästa generation
-\t(2)-Rensa bort alla celler
-\t(3)-Gå fram ett satt antal generationer
-\t(4)-Spara de celler du har och avsluta programmet
-                    """)
-            try:
-                val=int(input())
-                if val==1:
-                    self.update()
+def main_menue(self):
+    
+    
+    self.grid=self.make_grid()
+    self.make_print_grid()
+    run=True
+    while run:
+        print("""
+\t(1)-Run game
+\t(2)-Save curent grid
+\t(3)-Exit
+                """)
+        try:
+            chois=int(input())
+            if chois==1:
+                self.update()
+                self.grid=self.make_grid()
+                self.make_print_grid()
+
+
+            elif chois==2:
+                antal=int(input("hur många generationer framåt vill du gå"))
+                try:
+                    for i in range(antal):
+                        self.update()
                     self.grid=self.make_grid()
-                    self.print_grid()
+                    self.make_print_grid()
+                except:
+                    print("Måste vara ett nummer")
 
-                elif val==2:
-                    self.cells = []
-                    self.grid=self.make_grid()
-                    self.print_grid()
-                elif val==3:
-                    antal=int(input("hur många generationer framåt vill du gå"))
-                    try:
-                        for i in range(antal):
-                            self.update()
-                        self.grid=self.make_grid()
-                        self.print_grid()
-                    except:
-                        print("måste vara ett nummer")
+            elif chois==3:
+                self.spara(self.cells)
+                run=False
+            else:
+                print("inte ett alternativ, måste vara inom 1-4")
+        except:
+            print("inte ett alternativ, måste vara en sifra")
 
-                elif val==4:
-                    self.spara(self.cells)
-                else:
-                    print("inte ett alternativ, måste vara inom 1-4")
-            except:
-                print("inte ett alternativ, måste vara en sifra")
+        if chois==3:
+            sys.exit()
 
-
-
+def game_menue():
+    pass
 
 if __name__ == "__main__":
     test_grid = Grid()
-    test_grid.ui()
+    main_menue(test_grid)
 
 
 
