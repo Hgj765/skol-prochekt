@@ -14,25 +14,23 @@ class App():
         #it is just a tkinter window
 
         self.root = root
-        self.grid = Grid()
+        self.grid = Grid()#uses the grid class from Game_of_life.py becus im to lazy to coppy it in hear
+        self.delay = 500#the delay between each step when the game is played in ms
 
-        super().__init__()
-        self.grid_dict = {}
-
+        super().__init__()#inherited from tkinter
+        self.grid_dict = {}#the variebles used in the window
         self.spela=False
         self.task_id = None
-
-        self.screen_width = self.root.winfo_screenwidth()#fråga inte ordet var kortare
+        self.screen_width = self.root.winfo_screenwidth()#dont ask i dont remember
         self.screen_height = self.root.winfo_screenheight()
-
-
         self.tw = tk.IntVar(value=self.grid.width)
         self.th = tk.IntVar(value=self.grid.height)
-        self.multi_generations_step =tk.StringVar()
-        tk.Grid.columnconfigure(root, 1, weight=1)
+        self.multi_generations_step =tk.IntVar(value=1)
+
+        tk.Grid.columnconfigure(root, 1, weight=1)          #makes the window dynemicly resizeble
         tk.Grid.rowconfigure(root, 0, weight=1)
         tk.Grid.rowconfigure(root, 1, weight=1)
-        self.frame1 = tk.LabelFrame(self.root)
+        self.frame1 = tk.LabelFrame(self.root)              #the difrent frames in the window
         self.frame1.grid(row=0,column=0,sticky="NW")
         self.frame2 = tk.LabelFrame(self.root)
         self.frame2.grid(row=1, column=0, sticky="Nw")
@@ -44,7 +42,7 @@ class App():
         self.new_grid()
     def extend_init(self):
         #this functions only exists becus there is a rule about the length of functions
-        #it is just an extention of __init__
+        #it is just an extention of __init__ so pretend it isnt a difrent function
         self.btn_n = tk.Button(self.frame1, text="Next step", width=16, command=self.next_step)
         self.btn_n.grid(row=1, sticky="nw")
         self.btn_c = tk.Button(self.frame1, text="Clear bord", width=16, command=self.clear)
@@ -52,11 +50,11 @@ class App():
         self.btn_p = tk.Button(self.frame1, text="Play", width=16, command=self.toggle_play)
         self.btn_p.grid(row=3, sticky="nw")
 
-        self.name = tk.Label(self.frame1, text="Antalet generations steg")
+        self.name = tk.Label(self.frame1, text="How many steps to skip ")
         self.name.grid(row=4)
         self.name_entry = tk.Entry(self.frame1, textvariable=self.multi_generations_step)
         self.name_entry.grid(row=5)
-        self.btn = tk.Button(self.frame1, text="Gå frammåt flera steg", width=16, command=self.new_grid)
+        self.btn = tk.Button(self.frame1, text=f"skip generations", width=16, command=self.multi_step)
         self.btn.grid(row=6, sticky="nw")
 
         self.btn_s = tk.Button(self.frame1, text="Save ", width=16, command=self.save)
@@ -81,7 +79,7 @@ class App():
         self.root.destroy()
     def save(self):
         #calls upon the grid method to save the cells to a file
-        self.grid.spara(self.grid.cells)
+        self.grid.save(self.grid.cells)
     def select_cell(self, button):
         #a cell when clicked is either added to the list of cells or removed from it
         #Input: "button" the button that was clicked, dont ask how it works it is weard as shit
@@ -149,6 +147,18 @@ class App():
         for cell in self.grid.cells:
 
             self.grid_dict[str(cell)].config(bg="green")
+    def multi_step(self):
+        # its just next step but with a for loop
+        # Input: nothing
+        # Output: new gen grid
+        for i in range(int(self.multi_generations_step.get())):
+            self.grid.update()
+
+        for cell in self.grid_dict.keys():
+            self.grid_dict[cell].config(bg="SystemButtonFace")
+
+        for cell in self.grid.cells:
+            self.grid_dict[str(cell)].config(bg="green")
     def toggle_play(self):
         #toggles the play button between start and pause and while it is in play the play method is runing
         #Input: from button
@@ -169,7 +179,7 @@ class App():
 
         if self.spela:
             self.next_step()
-            self.task_id = self.root.after(500, self.play)
+            self.task_id = self.root.after(self.delay, self.play)
     def clear(self):
         #removes all cells from the grid and clears the list
         #input: nothing
