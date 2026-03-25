@@ -26,7 +26,8 @@ class Cell:
 class Grid:
     #the class creates the grid and manages the game
     #attributes: width, height, cells(a list of cell obiects that are just used as coordinates)
-    def __init__(self, width=10, height=10, cells = []):
+    def __init__(self, width=10, height=10, cells = [],file="glidare.txt"):
+        #Atribut: file,width, height(the size of the grid) and cells(the list of licing cells in the curent game)
         #innit creates the base structure of the grid
             #definites width and height
             #reading the file and adding saved cells
@@ -34,13 +35,14 @@ class Grid:
 
         self.width = width
         self.height = height
+        self.FILE = file
 
         self.cells = cells
-        self.grann_lista = {}
+        self.gran_list = {}
 
         #this sould be a function but when i tryed to make it a function everything blow up so maby later
         try:  # reads the file and adds the cells to self.cells
-            with open("glidare.txt", "r") as f:
+            with open(self.FILE, "r") as f:
                 file_c = f.readlines()
 
             try:#makes sure that the grid is big enough to contain all the cells
@@ -52,8 +54,11 @@ class Grid:
                         self.width = (int(file_c[c][0]))
                     if int(file_c[c][1]) > self.height:
                         self.height = (int(file_c[c][1]))
+                    new_cell=Cell(int(file_c[c][0]), int(file_c[c][1]))
 
-                    self.cells.append(Cell(int(file_c[c][0]), int(file_c[c][1])))
+                    if not any(str(new_cell) == str(i) for i in self.cells):
+                        self.cells.append(new_cell)
+
             except:
                 print("Error: somthing went wrong with the file")
         except:
@@ -63,6 +68,7 @@ class Grid:
         # Prints the grid in the console in a nice way
         # Input: self.grid self.width self.height
         # Output: nothing but prints the grid
+        #the name is realy weard becous it used to be 2 methods
         grid = []
         for height in range(self.height + 1):
             grid.append([])
@@ -123,29 +129,38 @@ class Grid:
         #this method sucks but it works
         #Input: self.cells self.grann_lista self.width self.height
         #Output: nothing but adds the new cells to self.cells
+        #improvment potential: make a list so the boxes that have alrady been checke is not checked again(optimisation)
 
-        for cell in self.grann_lista:
-                for width in range(-1,2):
-                    for hight in range(-1, 2):
-                        curent_cell = Cell((cell.x+width)%(self.width+1),(cell.y+hight)%(self.height+1))
+        #How it works: first there is a for loop for all the cells alive, then two foor loops from -1 to 1. ther is no point in checking boxes that dosent have neigbours so the boxes around the living cells are the only ones checked
+            #then we define the new cell candidate as a cell obiect with the coordinates of the cell we are checking around plus width_add /hight_add
+            #in the if staments it is first checked if the new cell has the same coordinates as the original cell, wich it is not alowed to have
+                #then we ckeck if the new cell alrady exists in self.grann_lista
+                #and we ckeck if it is in self.cells (i dont understand why it is needed to ckeck both self.cells and self.grann_lista bur if one of them is removed thing that souldnt be there start apearing)
+            #then finaly, we add the new cell to a list coppy of self.grann_lista and then send it in to self.neighbours, the new list means we can use an alrady existing function to do the ckeck
+            #when the ckeck is done ew simply extrackt the number from the list and see if it == 3
+            #if it dose we add it to self.cells
+        for cell in self.gran_list:
+                for width_add in range(-1,2):
+                    for hight_add in range(-1, 2):
+                        curent_cell = Cell((cell.x+width_add)%(self.width+1),(cell.y+hight_add)%(self.height+1))
 
-                        if not (hight == 0 and width == 0):
-                            if not (str(curent_cell) in list(str(i) for i in self.grann_lista.keys())):
+                        if not (hight_add == 0 and width_add == 0):  #the if statements sould be one but that is unreadeble
+                            if not (str(curent_cell) in list(str(i) for i in self.gran_list.keys())):
                                     if str(curent_cell) not in str(self.cells):
 
-                                        födas_alternativ = self.neighbours(list(self.grann_lista.keys()) + [curent_cell])
-                                        födas_alternativ_granar = födas_alternativ[list(födas_alternativ.keys()-self.grann_lista.keys())[0]]
+                                        birth_alternativ = self.neighbours(list(self.gran_list.keys()) + [curent_cell])
+                                        birth_alternativ_granar = birth_alternativ[list(birth_alternativ.keys() - self.gran_list.keys())[0]]
 
-                                        if födas_alternativ_granar ==3:
-                                            self.cells.append(list(födas_alternativ.keys()-self.grann_lista.keys())[0])
+                                        if birth_alternativ_granar ==3:
+                                            self.cells.append(list(birth_alternativ.keys() - self.gran_list.keys())[0])
 
     def die(self):
         #if cells naibour amount somthing other than 2 or 3 it is removed
         #also if the cell is outside of the grid it is removed but that sould be imposible so dont worry about it
         #Input: self.cells self.grann_lista self.width self.height
         #Output: nothing but removes cells that are to die
-        for cell in self.grann_lista:
-            if not (2 == self.grann_lista[cell] or self.grann_lista[cell]== 3) or not 0<=cell.x<= self.width or not 0<=cell.y<= self.height:
+        for cell in self.gran_list:
+            if not (2 == self.gran_list[cell] or self.gran_list[cell] == 3) or not 0 <= cell.x <= self.width or not 0 <= cell.y <= self.height:
                 self.cells.remove(cell)
 
     def update(self):
@@ -153,8 +168,11 @@ class Grid:
         #function goes to the next generation of the game
         #Input: self.cells self.grann_lista self.width self.height
         #Output: nothing but updates self.cells
+        #self.grann_lista is created so birth and die isnt effected by each other and can workin paralel
+        #so there is a original state and a curent satte they can work with
 
-        self.grann_lista = self.neighbours(self.cells)
+        self.gran_list = self.neighbours(self.cells)
+
         self.die()
         self.birth()
 
@@ -162,24 +180,26 @@ class Grid:
         #function saves the curent cells to a file
         #Input: cell_list
         #Output: saves the cells to a file in the dum format we are told to use
-        #I WHANT TO USE JSON, WHAT IS THIS SHIT!!! >:(
+        #I WHANT TO USE JSON, WHAT IS THIS SHIT FORMAT!!! >:(
 
-        with open("glidare.txt", "w") as f:
+        with open(self.FILE, "w") as f:
             for row in cell_list:
                 f.write(str(int(row.x))+" "+str(int(row.y))+"\n")
 
-def main_menue(self):
+def main_menue():
     #the main menue of the game
     #self is inputed so i dont have to change all the code that used to be in a class
     #Input: self
     #Output: runs the game
+    self = Grid()
     self.make_print_grid()
 
     while True:
         print("""
 \t(1)-Run game
-\t(2)-Save current grid
-\t(3)-Exit without saving
+\t(2)-Resice grid
+\t(3)-Save current grid
+\t(4)-Exit without saving
                 """)
         try:
             chois=int(input())
@@ -187,9 +207,15 @@ def main_menue(self):
             if chois==1:
                 game_menue(self)
             elif chois==2:
+                print("If there are cells outside of the grid the grid will be resized automaticly")
+                w=input("How wide do you want the grid to be ")
+                h=input("How high do you want the grid to be ")
+                self.save(self.cells)
+                self = Grid(int(w),int(h))
+            elif chois==3:
                 self.save(self.cells)
                 print("Saved")
-            elif chois==3:
+            elif chois==4:
                 print("Exiting")
                 break
 
@@ -232,8 +258,8 @@ def game_menue(self):
 
 
 if __name__ == "__main__":
-    test_grid = Grid()
-    main_menue(test_grid)
+
+    main_menue()
 
 
 

@@ -23,8 +23,8 @@ class App():
         self.task_id = None
         self.screen_width = self.root.winfo_screenwidth()#dont ask i dont remember
         self.screen_height = self.root.winfo_screenheight()
-        self.tw = tk.IntVar(value=self.grid.width)
-        self.th = tk.IntVar(value=self.grid.height)
+        self.tw = tk.IntVar(value=self.grid.width)#tw stand for text_width
+        self.th = tk.IntVar(value=self.grid.height)#th stands for text_height
         self.multi_generations_step =tk.IntVar(value=1)
 
         tk.Grid.columnconfigure(root, 1, weight=1)          #makes the window dynemicly resizeble
@@ -84,7 +84,6 @@ class App():
         #a cell when clicked is either added to the list of cells or removed from it
         #Input: "button" the button that was clicked, dont ask how it works it is weard as shit
         #Output: nothing but changes the color of the button and changes the list of cells
-
         current_color = button.cget("bg")
         vald_cell = Cell(int(button.grid_info()['column']),int(button.grid_info()['row']))
 
@@ -93,13 +92,15 @@ class App():
             self.grid.cells.append(vald_cell)
         else:
             new_color = "SystemButtonFace"
-            for cell in self.grid.cells:#den ville inte funka annars men de här suger
+            for cell in self.grid.cells:#sins the cells are class obiects and not a list the for loop is nesesery to find the obiect and effect it
+                #i hate this and cells souldn´t be a class obiect but to late now and this works
                 if cell.x == vald_cell.x and cell.y == vald_cell.y:
                     self.grid.cells.remove(cell)
         button.config(bg=new_color)
     def new_grid(self):
         #first it clears the grid and then it updates it with the new size and cells
         #also creates the original grid the same way
+
         self.grid.height = int(self.th.get())
         self.grid.width = int(self.tw.get())
         for c in range(0, len(self.grid.cells)):  # c for coordinate but that is to long
